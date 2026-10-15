@@ -102,8 +102,10 @@ public class DeckTest
     public void testDealCardNormal()
     {
         deck.build(1);
+        assertEquals(52, deck.drawPileSize());
         Card dealtCard = deck.dealCard();
 
+        assertEquals(51, deck.drawPileSize());
         assertNotNull("Dealt card should not be null.", dealtCard);
         assertNotNull(
             "Dealt card must have a valid suit.",
@@ -161,6 +163,43 @@ public class DeckTest
         assertNotNull(
             "Card should be successfully dealt after auto-recycling.",
             recycledCard);
+    }
+
+
+    /**
+     * Test method for discard with a null card.
+     */
+    public void testDiscardNull()
+    {
+        boolean exceptionThrown = false;
+        try
+        {
+            deck.discard(null);
+        }
+        catch (IllegalArgumentException e)
+        {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+    }
+
+
+    /**
+     * Test method for drawPileSize after building two decks.
+     */
+    public void testDrawPileSize()
+    {
+        deck.build(2);
+        assertEquals(104, deck.drawPileSize());
+    }
+
+
+    /**
+     * Test method for drawPileSize on a deck that was never built.
+     */
+    public void testDrawPileSizeEmpty()
+    {
+        assertEquals(0, deck.drawPileSize());
     }
 
 }

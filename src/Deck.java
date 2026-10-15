@@ -118,12 +118,26 @@ public class Deck
     /**
      * Adds a played card to the discard pile.
      * 
-     * @param card
-     *            the Card to be discarded
+     * @param card the Card to be discarded
      */
     public void discard(Card card)
     {
+        if (card == null)
+        {
+            throw new IllegalArgumentException("Card cannot be null.");
+        }
         discardPile.add(card);
+    }
+
+
+    /**
+     * Gets the number of cards left in the draw pile.
+     *
+     * @return the draw pile size
+     */
+    public int drawPileSize()
+    {
+        return drawPile.size();
     }
 
 }

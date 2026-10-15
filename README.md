@@ -26,9 +26,7 @@ Our unknowns:
 - Power-ups interrupting the game loop: still open, not sure if we will do this
 
 What doesn't work yet:
-
 - Splitting and insurance are not started.
-- Deck.discard has no tests, and dealCard doesn't test the pile size.
 
 
 
@@ -36,9 +34,8 @@ What doesn't work yet:
 
 To finish the MVP:
 
-1. Add Deck tests for discard (normal and null) and a way to check the draw pile size.
-2. Hide the dealer's second card until the player's turn is over.
-3. Play through a lot of rounds by hand to look for bugs.
+1. Hide the dealer's second card until the player's turn is over.
+2. Play through a lot of rounds by hand to look for bugs.
 
 Stretch goals:
 
