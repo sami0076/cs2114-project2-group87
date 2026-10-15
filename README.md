@@ -55,13 +55,17 @@ New tests needed:
 
 Who does what:
 
-| Task             | Owner    |
-| ---------------- | -------- |
-| Deck tests       | Angelina |
-| Hide dealer card | Pratham  |
-| Splitting        | Tien     |
-| Insurance        | Sami     |
-| New tests        | Pratham  |
+
+| Task             | Owner |
+| ---------------- | ----- |
+| Deck tests       | Tien  |
+| Hide dealer card |Pratham|
+| Splitting        | Angela|
+| Insurance        | Sami  |
+| New tests        | Sami  |
+
+
+
 
 ## Attribution
 
@@ -84,4 +88,4 @@ Who does what:
 | Deck.java               | Tien Vu                 | wrote                                                        |
 | DeckTest.java           | Tien Vu                 | wrote                                                        |
 
-GenAI: Sami used Claude to help plan out writing GameController and its tests, based on our spec and test plan. We reviewed the code and ran the tests ourselves. Pratham used Gemini to verify the code based on the spec, to create Javadocs, and to plan out writing the test cases.
+GenAI: Sami used Claude to help plan out writing classes and their tests, making sure to verify with spec before planning. We reviewed the code and ran the tests ourselves. Pratham used gemini to verify the code based on the spec, to create java docs, and planning out writing the test cases.
