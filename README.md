@@ -53,7 +53,7 @@ Who does what:
 | Task             | Owner |
 | ---------------- | ----- |
 | Deck tests       |       |
-| Hide dealer card |       |
+| Hide dealer card |Pratham|
 | Splitting        |       |
 | Insurance        | Sami  |
 | New tests        |       |
@@ -74,14 +74,14 @@ Who does what:
 | PlayerTest.java         | Sami Saleh              | wrote                                        |
 | GameController.java     | Sami Saleh              | wrote, GenAI-assisted                        |
 | GameControllerTest.java | Sami Saleh              | wrote, GenAI-assisted                        |
-| Hand.java               | Pratham Singh           | wrote                                        |
-| HandTest.java           | Pratham Singh           | wrote                                        |
-| Dealer.java             | Pratham Singh           | wrote                                        |
-| DealerTest.java         | Pratham Singh           | wrote                                        |
-| RoundResult.java        | Pratham Singh           | wrote                                        |
-| RoundResultTest.java    | Pratham Singh           | wrote                                        |
+| Hand.java               | Pratham Singh           | wrote, GenAI-assisted                        |
+| HandTest.java           | Pratham Singh           | wrote, GenAI-assisted                        |
+| Dealer.java             | Pratham Singh           | wrote, GenAI-assisted                        |
+| DealerTest.java         | Pratham Singh           | wrote, GenAI-assisted                        |
+| RoundResult.java        | Pratham Singh           | wrote, GenAI-assisted                        |
+| RoundResultTest.java    | Pratham Singh           | wrote, GenAI-assisted                        |
 | Deck.java               | Angelina Gust           | wrote                                        |
 | DeckTest.java           | Angelina Gust           | wrote                                        |
 
 
-GenAI: Sami used Claude to help plan out writing GameController and its tests, based on our spec and test plan. We reviewed the code and ran the tests ourselves.
+GenAI: Sami used Claude to help plan out writing GameController and its tests, based on our spec and test plan. We reviewed the code and ran the tests ourselves. Pratham used gemini to verify the code based on the spec, to create java docs, and planning out writing the test cases.
