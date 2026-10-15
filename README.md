@@ -88,4 +88,4 @@ Who does what:
 | Deck.java               | Tien Vu                 | wrote                                                        |
 | DeckTest.java           | Tien Vu                 | wrote                                                        |
 
-GenAI: Sami used Claude to help plan out writing classes and their tests, making sure to verify with spec before planning. We reviewed the code and ran the tests ourselves. Pratham used gemini to verify the code based on the spec, to create java docs, and planning out writing the test cases.
+GenAI: Sami, Tien, Pratham, and Angelina used Claude to help plan out writing classes and their tests, making sure to verify with spec before planning. We reviewed the code and ran the tests ourselves. Pratham used gemini to verify the code based on the spec, to create java docs, and planning out writing the test cases.
