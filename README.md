@@ -54,9 +54,9 @@ Who does what:
 | ---------------- | ----- |
 | Deck tests       | Tien  |
 | Hide dealer card |Pratham|
-| Splitting        |       |
+| Splitting        | Angela|
 | Insurance        | Sami  |
-| New tests        |       |
+| New tests        | Sami  |
 
 
 
@@ -84,4 +84,4 @@ Who does what:
 | DeckTest.java           | Angelina Gust           | wrote                                        |
 
 
-GenAI: Sami used Claude to help plan out writing GameController and its tests, based on our spec and test plan. We reviewed the code and ran the tests ourselves. Pratham used gemini to verify the code based on the spec, to create java docs, and planning out writing the test cases.
+GenAI: Sami used Claude to help plan out writing classes and their tests, making sure to verify with spec before planning. We reviewed the code and ran the tests ourselves. Pratham used gemini to verify the code based on the spec, to create java docs, and planning out writing the test cases.
