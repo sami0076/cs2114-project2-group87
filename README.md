@@ -52,7 +52,7 @@ Who does what:
 
 | Task             | Owner |
 | ---------------- | ----- |
-| Deck tests       |       |
+| Deck tests       | Tien  |
 | Hide dealer card |Pratham|
 | Splitting        |       |
 | Insurance        | Sami  |
