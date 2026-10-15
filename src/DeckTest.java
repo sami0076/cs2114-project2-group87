@@ -104,13 +104,13 @@ public class DeckTest
         deck.build(1);
         Card dealtCard = deck.dealCard();
 
-        assertNotNull(dealtCard, "Dealt card should not be null.");
+        assertNotNull("Dealt card should not be null.", dealtCard);
         assertNotNull(
-            dealtCard.getSuit(),
-            "Dealt card must have a valid suit.");
+            "Dealt card must have a valid suit.",
+            dealtCard.getSuit());
         assertNotNull(
-            dealtCard.getRank(),
-            "Dealt card must have a valid rank.");
+            "Dealt card must have a valid rank.",
+            dealtCard.getRank());
     }
 
 
