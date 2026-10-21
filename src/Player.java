@@ -13,6 +13,7 @@ public class Player {
     private int handCount;
     private int active;
     private double insuranceBet;
+    private LinkedChain<String> inventory;
 
     /**
      * Creates a player with a starting bankroll.
@@ -29,6 +30,7 @@ public class Player {
         bets = new double[2];
         handCount = 1;
         active = 0;
+        inventory = new LinkedChain<String>();
     }
 
     /**
@@ -121,6 +123,56 @@ public class Player {
      */
     public double getInsuranceBet() {
         return insuranceBet;
+    }
+
+    /**
+     * Earns a power-up at no cost.
+     *
+     * @param name the power-up name
+     */
+    public void addPowerUp(String name) {
+        inventory.add(name);
+    }
+
+    /**
+     * Buys a power-up if the bankroll covers the cost.
+     *
+     * @param name the power-up name
+     * @param cost the price
+     * @return true if it was bought
+     */
+    public boolean buyPowerUp(String name, double cost) {
+        if (cost > bankroll) {
+            return false;
+        }
+        bankroll -= cost;
+        inventory.add(name);
+        return true;
+    }
+
+    /**
+     * Spends one power-up.
+     *
+     * @param name the power-up name
+     * @return true if the player had one to spend
+     */
+    public boolean usePowerUp(String name) {
+        return inventory.remove(name) != null;
+    }
+
+    /**
+     * Doubles the bet on the hand being played without charging the
+     * bankroll.
+     */
+    public void freeDouble() {
+        bets[active] *= 2;
+    }
+
+    /**
+     * @return the power-up inventory, which carries across rounds
+     */
+    public LinkedChain<String> getInventory() {
+        return inventory;
     }
 
     /**

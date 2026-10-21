@@ -7,6 +7,9 @@ import java.util.Scanner;
  * @version October 2026
  */
 public class GameController {
+    private static final double PEEK_COST = 25;
+    private static final double DOUBLE_COST = 40;
+
     private Deck deck;
     private Player player;
     private Dealer dealer;
@@ -138,6 +141,29 @@ public class GameController {
             player.getHand(1).addCard(deck.dealCard());
             return true;
         }
+        if ("peek".equalsIgnoreCase(command)) {
+            if (!player.usePowerUp("Peek")) {
+                System.out.println("You do not have that power-up.");
+                return true;
+            }
+            System.out.println("Hole card: "
+                + dealer.getHand().getCards().get(1));
+            return true;
+        }
+        if ("freedouble".equalsIgnoreCase(command)) {
+            if (player.getHand().size() != 2) {
+                System.out.println(
+                    "You can only double down on your first two cards.");
+                return true;
+            }
+            if (!player.usePowerUp("Free Double")) {
+                System.out.println("You do not have that power-up.");
+                return true;
+            }
+            player.freeDouble();
+            player.addCard(deck.dealCard());
+            return false;
+        }
         System.out.println(
             "Command not recognized. Please type 'Hit' or 'Stand'.");
         return true;
@@ -228,6 +254,9 @@ public class GameController {
             payout = bet;
         }
 
+        if (outcome.equals("Blackjack")) {
+            player.addPowerUp("Peek");
+        }
         player.receivePayout(payout);
         return new RoundResult(outcome, bet, payout);
     }
@@ -259,6 +288,21 @@ public class GameController {
     }
 
     /**
+     * Buys one power-up for the player.
+     *
+     * @param name the power-up name
+     * @param cost the price
+     */
+    private void buy(String name, double cost) {
+        if (player.buyPowerUp(name, cost)) {
+            System.out.println("Bought " + name + ".");
+        }
+        else {
+            System.out.println("Not enough money.");
+        }
+    }
+
+    /**
      * Plays the hand the player is currently on until the turn ends.
      */
     private void playHand() {
@@ -266,7 +310,8 @@ public class GameController {
             + " (" + player.getScore() + ")");
         boolean turn = !player.getHand().isBlackjack();
         while (turn) {
-            System.out.println("Hit, Stand, Double, or Split?");
+            System.out.println(
+                "Hit, Stand, Double, Split, Peek, or FreeDouble?");
             if (!in.hasNext()) {
                 return;
             }
@@ -282,7 +327,8 @@ public class GameController {
     public void play() {
         chooseDecks();
         while (!player.isBroke()) {
-            System.out.println("Type 'Play' or 'Quit':");
+            System.out.println("Type 'Play', 'Quit', 'BuyPeek' ($"
+                + PEEK_COST + "), or 'BuyDouble' ($" + DOUBLE_COST + "):");
             if (!in.hasNext()) {
                 break;
             }
@@ -292,6 +338,12 @@ public class GameController {
             }
             else if ("play".equalsIgnoreCase(input)) {
                 playRound();
+            }
+            else if ("buypeek".equalsIgnoreCase(input)) {
+                buy("Peek", PEEK_COST);
+            }
+            else if ("buydouble".equalsIgnoreCase(input)) {
+                buy("Free Double", DOUBLE_COST);
             }
             else {
                 System.out.println(

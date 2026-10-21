@@ -367,6 +367,64 @@ public class GameControllerTest extends TestCase {
     }
 
     /**
+     * Tests a blackjack earns a Peek, that Peek shows the hole card and
+     * is used up, and that using one you do not have is rejected.
+     */
+    public void testPeek() {
+        GameController game = withBet("10");
+        Player p = game.getPlayer();
+        p.addCard(new Card("Hearts", "A"));
+        p.addCard(new Card("Spades", "K"));
+        game.getDealer().addCard(new Card("Clubs", "Q"));
+        game.getDealer().addCard(new Card("Clubs", "9"));
+        assertEquals("Blackjack", game.finishRound().getOutcome());
+        assertEquals(1, p.getInventory().size());
+        p.placeBet(10);
+        game.getDealer().addCard(new Card("Clubs", "4"));
+        game.getDealer().addCard(new Card("Hearts", "7"));
+        assertTrue(game.processTurn("peek"));
+        assertTrue(systemOut().getHistory().contains("Hole card: 4 of Clubs"));
+        assertEquals(0, p.getInventory().size());
+        assertTrue(game.processTurn("Peek"));
+        assertTrue(systemOut().getHistory().contains("You do not have"));
+    }
+
+    /**
+     * Tests FreeDouble doubles the bet without charging the bankroll,
+     * and is rejected after the first two cards.
+     */
+    public void testFreeDouble() {
+        GameController game = withBet("10");
+        Player p = game.getPlayer();
+        p.addPowerUp("Free Double");
+        p.addCard(new Card("Hearts", "5"));
+        p.addCard(new Card("Spades", "6"));
+        assertFalse(game.processTurn("freedouble"));
+        assertEquals(20, p.getCurrentBet(), 0.01);
+        assertEquals(90, p.getBankroll(), 0.01);
+        assertEquals(3, p.getHand().size());
+        assertEquals(0, p.getInventory().size());
+        p.addPowerUp("Free Double");
+        assertTrue(game.processTurn("freedouble"));
+        assertEquals(20, p.getCurrentBet(), 0.01);
+        assertEquals(1, p.getInventory().size());
+    }
+
+    /**
+     * Tests power-ups are bought between rounds until the money runs
+     * out.
+     */
+    public void testBuyPowerUp() {
+        GameController game =
+            make("1 buypeek buydouble buypeek buydouble quit");
+        game.play();
+        assertEquals(3, game.getPlayer().getInventory().size());
+        assertEquals(10, game.getPlayer().getBankroll(), 0.01);
+        assertTrue(systemOut().getHistory().contains("Bought Peek."));
+        assertTrue(systemOut().getHistory().contains("Not enough money."));
+    }
+
+    /**
      * Tests insurance pays 2 to 1 when the dealer has blackjack.
      */
     public void testInsurancePays() {
