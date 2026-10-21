@@ -77,7 +77,7 @@ public class GameController {
     }
 
     /**
-     * Handles one player command: Hit, Stand, or Double.
+     * Handles one player command: Hit, Stand, Double, or Split.
      *
      * @param command the command typed by the user
      * @return true if the player's turn continues, false if it is over
@@ -100,6 +100,18 @@ public class GameController {
             player.addCard(deck.dealCard());
             return false;
         }
+        if ("split".equalsIgnoreCase(command)) {
+            if (!player.canSplit()) {
+                System.out.println("Cannot split. You need a matching pair "
+                    + "on your first two cards and enough money to match "
+                    + "your bet.");
+                return true;
+            }
+            player.split();
+            player.getHand(0).addCard(deck.dealCard());
+            player.getHand(1).addCard(deck.dealCard());
+            return true;
+        }
         System.out.println(
             "Command not recognized. Please type 'Hit' or 'Stand'.");
         return true;
@@ -115,25 +127,52 @@ public class GameController {
     }
 
     /**
-     * Decides the outcome, pays the player, records the result, and
-     * discards the cards.
+     * Decides the outcome of every hand in play, pays the player,
+     * records the results, and discards the cards.
      *
-     * @return the result of the round
+     * @return the result of the first hand
      * @throws IllegalStateException if no bet was placed
      */
     public RoundResult finishRound() {
-        double bet = player.getCurrentBet();
-        if (bet <= 0) {
+        if (player.getBet(0) <= 0) {
             throw new IllegalStateException("No bet was placed");
         }
-        int playerScore = player.getScore();
+        boolean allowBj = player.getHandCount() == 1;
+        RoundResult first = null;
+        for (int i = 0; i < player.getHandCount(); i++) {
+            RoundResult result =
+                settle(player.getHand(i), player.getBet(i), allowBj);
+            history.add(result);
+            System.out.println("Result: " + result);
+            if (first == null) {
+                first = result;
+            }
+            discardHand(player.getHand(i));
+        }
+        discardHand(dealer.getHand());
+        player.reset();
+        dealer.reset();
+        return first;
+    }
+
+    /**
+     * Scores one hand against the dealer and pays the player.
+     *
+     * @param hand the hand to settle
+     * @param bet the bet on that hand
+     * @param allowBj true if a two-card 21 pays 3 to 2, which is false
+     *        for split hands
+     * @return the result for that hand
+     */
+    private RoundResult settle(Hand hand, double bet, boolean allowBj) {
+        int playerScore = hand.getScore();
         int dealerScore = dealer.getScore();
-        boolean playerBj = player.getHand().isBlackjack();
+        boolean playerBj = allowBj && hand.isBlackjack();
         boolean dealerBj = dealer.getHand().isBlackjack();
 
         String outcome;
         double payout;
-        if (player.isBust()) {
+        if (hand.isBust()) {
             outcome = "Loss";
             payout = 0;
         }
@@ -159,13 +198,7 @@ public class GameController {
         }
 
         player.receivePayout(payout);
-        RoundResult result = new RoundResult(outcome, bet, payout);
-        history.add(result);
-        discardHand(player.getHand());
-        discardHand(dealer.getHand());
-        player.reset();
-        dealer.reset();
-        return result;
+        return new RoundResult(outcome, bet, payout);
     }
 
     /**
@@ -179,25 +212,36 @@ public class GameController {
         dealInitialCards();
         System.out.println("Dealer shows: "
             + dealer.getHand().getCards().get(0));
+        playHand();
+        if (player.getHandCount() > 1) {
+            player.setActiveHand(1);
+            System.out.println("Now playing your second hand.");
+            playHand();
+        }
+        if (!player.allBust()) {
+            dealerPlay();
+        }
+        System.out.println("Dealer hand: " + dealer.getHand()
+            + " (" + dealer.getScore() + ")");
+        finishRound();
+    }
+
+    /**
+     * Plays the hand the player is currently on until the turn ends.
+     */
+    private void playHand() {
         System.out.println("Your hand: " + player.getHand()
             + " (" + player.getScore() + ")");
-
         boolean turn = !player.getHand().isBlackjack();
         while (turn) {
-            System.out.println("Hit, Stand, or Double?");
+            System.out.println("Hit, Stand, Double, or Split?");
             if (!in.hasNext()) {
-                break;
+                return;
             }
             turn = processTurn(in.next());
             System.out.println("Your hand: " + player.getHand()
                 + " (" + player.getScore() + ")");
         }
-        if (!player.isBust()) {
-            dealerPlay();
-        }
-        System.out.println("Dealer hand: " + dealer.getHand()
-            + " (" + dealer.getScore() + ")");
-        System.out.println("Result: " + finishRound());
     }
 
     /**

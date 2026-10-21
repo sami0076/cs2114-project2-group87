@@ -365,4 +365,107 @@ public class GameControllerTest extends TestCase {
         assertEquals("Rounds played: 0, Wins: 0, Losses: 0, Ties: 0, "
             + "Final money: $100.0", make("").getSummary());
     }
+
+    /**
+     * Tests Split deals one card to each new hand and takes a second
+     * bet of the same size.
+     */
+    public void testProcessTurnSplit() {
+        GameController game = withBet("10");
+        game.getPlayer().addCard(new Card("Hearts", "8"));
+        game.getPlayer().addCard(new Card("Spades", "8"));
+        assertTrue(game.processTurn("Split"));
+        assertEquals(2, game.getPlayer().getHandCount());
+        assertEquals(2, game.getPlayer().getHand(0).size());
+        assertEquals(2, game.getPlayer().getHand(1).size());
+        assertEquals(80, game.getPlayer().getBankroll(), 0.01);
+    }
+
+    /**
+     * Tests Split on a non-pair shows an error and changes nothing.
+     */
+    public void testProcessTurnSplitBadInput() {
+        GameController game = withBet("10");
+        game.getPlayer().addCard(new Card("Hearts", "K"));
+        game.getPlayer().addCard(new Card("Spades", "9"));
+        assertTrue(game.processTurn("split"));
+        assertEquals(1, game.getPlayer().getHandCount());
+        assertEquals(90, game.getPlayer().getBankroll(), 0.01);
+        assertTrue(systemOut().getHistory().contains("Cannot split."));
+    }
+
+    /**
+     * Tests Split with the whole bankroll already bet is rejected.
+     */
+    public void testProcessTurnSplitNoMoney() {
+        GameController game = make("1 100");
+        game.chooseDecks();
+        game.placeBet();
+        game.getPlayer().addCard(new Card("Hearts", "8"));
+        game.getPlayer().addCard(new Card("Spades", "8"));
+        assertTrue(game.processTurn("split"));
+        assertEquals(1, game.getPlayer().getHandCount());
+        assertEquals(0, game.getPlayer().getBankroll(), 0.01);
+    }
+
+    /**
+     * Tests both split hands are settled against the same dealer hand,
+     * each with its own bet and result.
+     */
+    public void testFinishRoundSplit() {
+        GameController game = withBet("10");
+        Player p = game.getPlayer();
+        p.addCard(new Card("Hearts", "8"));
+        p.addCard(new Card("Spades", "8"));
+        p.split();
+        p.getHand(0).addCard(new Card("Clubs", "K"));
+        p.getHand(1).addCard(new Card("Diamonds", "2"));
+        game.getDealer().addCard(new Card("Clubs", "10"));
+        game.getDealer().addCard(new Card("Hearts", "7"));
+        assertEquals("Win", game.finishRound().getOutcome());
+        assertEquals(2, game.getHistory().size());
+        assertEquals("Loss", game.getHistory().get(0).getOutcome());
+        assertEquals(100, p.getBankroll(), 0.01);
+        assertEquals(1, p.getHandCount());
+        assertEquals(0, p.getHand(1).size());
+    }
+
+    /**
+     * Tests a two-card 21 on a split hand pays 2x, not 3 to 2.
+     */
+    public void testFinishRoundSplitNoBlackjack() {
+        GameController game = withBet("10");
+        Player p = game.getPlayer();
+        p.addCard(new Card("Hearts", "A"));
+        p.addCard(new Card("Spades", "A"));
+        p.split();
+        p.getHand(0).addCard(new Card("Clubs", "K"));
+        p.getHand(1).addCard(new Card("Diamonds", "2"));
+        game.getDealer().addCard(new Card("Clubs", "10"));
+        game.getDealer().addCard(new Card("Hearts", "7"));
+        RoundResult first = game.finishRound();
+        assertEquals("Win", first.getOutcome());
+        assertEquals(20, first.getPayout(), 0.01);
+    }
+
+    /**
+     * Tests a round where both split hands bust pays nothing.
+     */
+    public void testFinishRoundSplitBothBust() {
+        GameController game = withBet("10");
+        Player p = game.getPlayer();
+        p.addCard(new Card("Hearts", "8"));
+        p.addCard(new Card("Spades", "8"));
+        p.split();
+        p.getHand(0).addCard(new Card("Clubs", "K"));
+        p.getHand(0).addCard(new Card("Diamonds", "K"));
+        p.getHand(1).addCard(new Card("Clubs", "Q"));
+        p.getHand(1).addCard(new Card("Diamonds", "Q"));
+        assertTrue(p.allBust());
+        game.getDealer().addCard(new Card("Clubs", "10"));
+        game.getDealer().addCard(new Card("Hearts", "7"));
+        assertEquals("Loss", game.finishRound().getOutcome());
+        assertEquals(2, game.getHistory().size());
+        assertEquals(80, p.getBankroll(), 0.01);
+    }
 }

@@ -248,4 +248,156 @@ public class PlayerTest extends TestCase {
         player.reset();
         assertEquals("Player Hand: [] Bankroll: $100.0", player.toString());
     }
+
+    /**
+     * Tests splitting a pair makes a second hand with a matching bet.
+     */
+    public void testSplit() {
+        player.placeBet(10);
+        player.addCard(new Card("Hearts", "8"));
+        player.addCard(new Card("Spades", "8"));
+        assertTrue(player.canSplit());
+        player.split();
+        assertEquals(2, player.getHandCount());
+        assertEquals(1, player.getHand(0).size());
+        assertEquals(1, player.getHand(1).size());
+        assertEquals(10, player.getBet(1), 0.01);
+        assertEquals(80, player.getBankroll(), 0.01);
+        assertFalse(player.canSplit());
+    }
+
+    /**
+     * Tests two 10-value cards of different ranks can be split but two
+     * cards of different values cannot.
+     */
+    public void testCanSplitByValue() {
+        player.placeBet(10);
+        player.addCard(king);
+        player.addCard(new Card("Spades", "10"));
+        assertTrue(player.canSplit());
+        player.reset();
+        player.placeBet(10);
+        player.addCard(king);
+        player.addCard(five);
+        assertFalse(player.canSplit());
+    }
+
+    /**
+     * Tests splitting is rejected with no money to match the bet.
+     */
+    public void testSplitNoMoney() {
+        player.placeBet(100);
+        player.addCard(new Card("Hearts", "8"));
+        player.addCard(new Card("Spades", "8"));
+        assertFalse(player.canSplit());
+        Exception thrown = null;
+        try {
+            player.split();
+        }
+        catch (Exception e) {
+            thrown = e;
+        }
+        assertTrue(thrown instanceof IllegalStateException);
+        assertEquals(1, player.getHandCount());
+    }
+
+    /**
+     * Tests canSplit is false with no bet placed and with one card.
+     */
+    public void testCanSplitNotTwoCards() {
+        player.addCard(new Card("Hearts", "8"));
+        player.addCard(new Card("Spades", "8"));
+        assertFalse(player.canSplit());
+        player.reset();
+        player.placeBet(10);
+        player.addCard(new Card("Hearts", "8"));
+        assertFalse(player.canSplit());
+    }
+
+    /**
+     * Tests doubling down on the second hand doubles only that bet.
+     */
+    public void testDoubleDownOnSplitHand() {
+        player.placeBet(10);
+        player.addCard(new Card("Hearts", "8"));
+        player.addCard(new Card("Spades", "8"));
+        player.split();
+        player.getHand(1).addCard(five);
+        player.setActiveHand(1);
+        assertTrue(player.canDoubleDown());
+        player.doubleDown();
+        assertEquals(20, player.getCurrentBet(), 0.01);
+        assertEquals(10, player.getBet(0), 0.01);
+        assertEquals(70, player.getBankroll(), 0.01);
+    }
+
+    /**
+     * Tests allBust is true only when every hand is over 21.
+     */
+    public void testAllBust() {
+        player.placeBet(10);
+        player.addCard(new Card("Hearts", "8"));
+        player.addCard(new Card("Spades", "8"));
+        player.split();
+        player.getHand(0).addCard(king);
+        player.getHand(0).addCard(new Card("Diamonds", "K"));
+        assertFalse(player.allBust());
+        player.getHand(1).addCard(new Card("Clubs", "Q"));
+        player.getHand(1).addCard(new Card("Diamonds", "Q"));
+        assertTrue(player.allBust());
+    }
+
+    /**
+     * Tests switching between the two hands after a split.
+     */
+    public void testSetActiveHand() {
+        player.placeBet(10);
+        player.addCard(new Card("Hearts", "8"));
+        player.addCard(new Card("Spades", "8"));
+        player.split();
+        player.setActiveHand(1);
+        player.addCard(five);
+        assertEquals(2, player.getHand(1).size());
+        assertEquals(13, player.getScore());
+        player.setActiveHand(0);
+        assertEquals(1, player.getHand().size());
+    }
+
+    /**
+     * Tests setActiveHand rejects a hand that is not in play.
+     */
+    public void testSetActiveHandBadInput() {
+        Exception thrown = null;
+        try {
+            player.setActiveHand(1);
+        }
+        catch (Exception e) {
+            thrown = e;
+        }
+        assertTrue(thrown instanceof IllegalArgumentException);
+        thrown = null;
+        try {
+            player.setActiveHand(-1);
+        }
+        catch (Exception e) {
+            thrown = e;
+        }
+        assertTrue(thrown instanceof IllegalArgumentException);
+    }
+
+    /**
+     * Tests reset clears the second hand and its bet.
+     */
+    public void testResetAfterSplit() {
+        player.placeBet(10);
+        player.addCard(new Card("Hearts", "8"));
+        player.addCard(new Card("Spades", "8"));
+        player.split();
+        player.reset();
+        assertEquals(1, player.getHandCount());
+        assertEquals(0, player.getHand(0).size());
+        assertEquals(0, player.getHand(1).size());
+        assertEquals(0, player.getBet(1), 0.01);
+        assertEquals(80, player.getBankroll(), 0.01);
+    }
 }

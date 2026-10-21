@@ -6,7 +6,7 @@ import student.TestCase;
  * @author Sami Saleh
  * @version October 2026
  */
-public class CardTest extends TestCase
+public class CardTest extends student.TestCase
 {
     private Card ace;
     private Card king;

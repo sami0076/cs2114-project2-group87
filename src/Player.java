@@ -1,14 +1,17 @@
 /**
- * Represents the user in Blackjack. Holds a bankroll, a current bet,
- * and a hand.
+ * Represents the user in Blackjack. Holds a bankroll and up to two
+ * hands, each with its own bet. A split creates the second hand, which
+ * is played after the first one.
  *
  * @author Sami Saleh
  * @version October 2026
  */
 public class Player {
     private double bankroll;
-    private double currentBet;
-    private Hand hand;
+    private Hand[] hands;
+    private double[] bets;
+    private int handCount;
+    private int active;
 
     /**
      * Creates a player with a starting bankroll.
@@ -21,8 +24,10 @@ public class Player {
             throw new IllegalArgumentException("Bankroll must be positive");
         }
         this.bankroll = bankroll;
-        currentBet = 0;
-        hand = new Hand();
+        hands = new Hand[] {new Hand(), new Hand()};
+        bets = new double[2];
+        handCount = 1;
+        active = 0;
     }
 
     /**
@@ -38,7 +43,7 @@ public class Player {
                 "Invalid bet. Enter a positive number within your bankroll.");
         }
         bankroll -= amount;
-        currentBet = amount;
+        bets[0] = amount;
     }
 
     /**
@@ -47,11 +52,12 @@ public class Player {
      * @return true if double down is allowed
      */
     public boolean canDoubleDown() {
-        return hand.size() == 2 && currentBet > 0 && bankroll >= currentBet;
+        return hands[active].size() == 2 && bets[active] > 0
+            && bankroll >= bets[active];
     }
 
     /**
-     * Doubles the current bet.
+     * Doubles the bet on the hand being played.
      *
      * @throws IllegalStateException if double down is not allowed
      */
@@ -59,8 +65,39 @@ public class Player {
         if (!canDoubleDown()) {
             throw new IllegalStateException("Cannot double down now");
         }
-        bankroll -= currentBet;
-        currentBet *= 2;
+        bankroll -= bets[active];
+        bets[active] *= 2;
+    }
+
+    /**
+     * Checks if the player can split. The first hand must be the only
+     * hand, hold two cards of the same value, and the bankroll must
+     * cover a second bet of the same size.
+     *
+     * @return true if splitting is allowed
+     */
+    public boolean canSplit() {
+        return handCount == 1 && hands[0].size() == 2 && bets[0] > 0
+            && bankroll >= bets[0]
+            && hands[0].getCards().get(0).getValue()
+                == hands[0].getCards().get(1).getValue();
+    }
+
+    /**
+     * Splits the first hand into two hands, moving one card to the new
+     * hand and matching the original bet. The caller deals one more
+     * card to each hand.
+     *
+     * @throws IllegalStateException if splitting is not allowed
+     */
+    public void split() {
+        if (!canSplit()) {
+            throw new IllegalStateException("Cannot split now");
+        }
+        bankroll -= bets[0];
+        bets[1] = bets[0];
+        handCount = 2;
+        hands[1].addCard(hands[0].getCards().removeFirst());
     }
 
     /**
@@ -77,27 +114,39 @@ public class Player {
     }
 
     /**
-     * Adds one card to the player's hand.
+     * Adds one card to the hand being played.
      *
      * @param card the card to add
      * @throws IllegalArgumentException if card is null
      */
     public void addCard(Card card) {
-        hand.addCard(card);
+        hands[active].addCard(card);
     }
 
     /**
-     * @return the player's hand score
+     * @return the score of the hand being played
      */
     public int getScore() {
-        return hand.getScore();
+        return hands[active].getScore();
     }
 
     /**
-     * @return true if the player's hand is over 21
+     * @return true if the hand being played is over 21
      */
     public boolean isBust() {
-        return hand.isBust();
+        return hands[active].isBust();
+    }
+
+    /**
+     * @return true if every hand in play is over 21
+     */
+    public boolean allBust() {
+        for (int i = 0; i < handCount; i++) {
+            if (!hands[i].isBust()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -115,25 +164,65 @@ public class Player {
     }
 
     /**
-     * @return the current bet
+     * @return the bet on the hand being played
      */
     public double getCurrentBet() {
-        return currentBet;
+        return bets[active];
     }
 
     /**
-     * @return the player's hand
+     * @return the hand being played
      */
     public Hand getHand() {
-        return hand;
+        return hands[active];
     }
 
     /**
-     * Clears the hand and bet for a new round.
+     * @param index the hand number, 0 or 1
+     * @return that hand
+     */
+    public Hand getHand(int index) {
+        return hands[index];
+    }
+
+    /**
+     * @param index the hand number, 0 or 1
+     * @return the bet on that hand
+     */
+    public double getBet(int index) {
+        return bets[index];
+    }
+
+    /**
+     * @return how many hands are in play, 1 or 2 after a split
+     */
+    public int getHandCount() {
+        return handCount;
+    }
+
+    /**
+     * Switches which hand is being played.
+     *
+     * @param index the hand number, from 0 to getHandCount() - 1
+     * @throws IllegalArgumentException if index is out of range
+     */
+    public void setActiveHand(int index) {
+        if (index < 0 || index >= handCount) {
+            throw new IllegalArgumentException("No such hand");
+        }
+        active = index;
+    }
+
+    /**
+     * Clears both hands and both bets for a new round.
      */
     public void reset() {
-        hand.clear();
-        currentBet = 0;
+        hands[0].clear();
+        hands[1].clear();
+        bets[0] = 0;
+        bets[1] = 0;
+        handCount = 1;
+        active = 0;
     }
 
     /**
@@ -141,6 +230,7 @@ public class Player {
      */
     @Override
     public String toString() {
-        return "Player Hand: " + hand.toString() + " Bankroll: $" + bankroll;
+        return "Player Hand: " + hands[active].toString()
+            + " Bankroll: $" + bankroll;
     }
 }
