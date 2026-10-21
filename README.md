@@ -40,12 +40,12 @@ RoundResult in the history log, and String in the power-up inventory.
 
 | File                    | Who                     | How                                                          |
 | ----------------------- | ----------------------- | ------------------------------------------------------------ |
-| LinkedChain.java        | Sami Saleh              | Given, modified by Sami: added removeFirst and changed remove(T) |
-| LinkedChainTest.java    | Sami Saleh              | wrote                                                        |
-| Card.java               | Sami Saleh              | wrote                                                        |
-| CardTest.java           | Sami Saleh              | wrote                                                        |
-| Player.java             | Pratham Singh           | wrote                                                        |
-| PlayerTest.java         | Pratham Singh           | wrote                                                        |
+| LinkedChain.java        | Sami Saleh              | Given, modified by Sami: added removeFirst and changed remove(T), GenAI-assisted |
+| LinkedChainTest.java    | Sami Saleh              | wrote, GenAI-assisted                                        |
+| Card.java               | Sami Saleh              | wrote, GenAI-assisted                                        |
+| CardTest.java           | Sami Saleh              | wrote, GenAI-assisted                                        |
+| Player.java             | Pratham Singh           | wrote, GenAI-assisted                                        |
+| PlayerTest.java         | Pratham Singh           | wrote, GenAI-assisted                                        |
 | GameController.java     | Pratham Singh           | wrote, GenAI-assisted                                        |
 | GameControllerTest.java | Pratham Singh           | wrote, GenAI-assisted                                        |
 | Hand.java               | Angelina Gust           | wrote, GenAI-assisted                                        |
@@ -54,7 +54,7 @@ RoundResult in the history log, and String in the power-up inventory.
 | DealerTest.java         | Angelina Gust           | wrote, GenAI-assisted                                        |
 | RoundResult.java        | Tien Vu                 | wrote, GenAI-assisted                                        |
 | RoundResultTest.java    | Tien Vu                 | wrote, GenAI-assisted                                        |
-| Deck.java               | Tien Vu                 | wrote                                                        |
-| DeckTest.java           | Tien Vu                 | wrote                                                        |
+| Deck.java               | Tien Vu                 | wrote, GenAI-assisted                                        |
+| DeckTest.java           | Tien Vu                 | wrote, GenAI-assisted                                        |
 
 GenAI: Sami, Tien, Pratham, and Angelina used Claude to help plan out writing classes and their tests, making sure to verify with spec before planning. We reviewed the code and ran the tests ourselves. Pratham used gemini to verify the code based on the spec, to create java docs, and planning out writing the test cases.
