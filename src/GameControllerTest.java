@@ -367,6 +367,68 @@ public class GameControllerTest extends TestCase {
     }
 
     /**
+     * Tests insurance pays 2 to 1 when the dealer has blackjack.
+     */
+    public void testInsurancePays() {
+        GameController game = make("1 10 yes");
+        game.chooseDecks();
+        game.placeBet();
+        game.getDealer().addCard(new Card("Clubs", "K"));
+        game.getDealer().addCard(new Card("Hearts", "A"));
+        game.offerInsurance();
+        assertEquals(5, game.getPlayer().getInsuranceBet(), 0.01);
+        assertEquals(85, game.getPlayer().getBankroll(), 0.01);
+        game.getPlayer().addCard(new Card("Spades", "K"));
+        game.getPlayer().addCard(new Card("Spades", "9"));
+        assertEquals("Loss", game.finishRound().getOutcome());
+        assertEquals(100, game.getPlayer().getBankroll(), 0.01);
+    }
+
+    /**
+     * Tests insurance is lost when the dealer has no blackjack.
+     */
+    public void testInsuranceLoses() {
+        GameController game = make("1 10 yes");
+        game.chooseDecks();
+        game.placeBet();
+        game.getDealer().addCard(new Card("Clubs", "9"));
+        game.getDealer().addCard(new Card("Hearts", "A"));
+        game.offerInsurance();
+        game.getPlayer().addCard(new Card("Spades", "K"));
+        game.getPlayer().addCard(new Card("Spades", "9"));
+        assertEquals("Loss", game.finishRound().getOutcome());
+        assertEquals(85, game.getPlayer().getBankroll(), 0.01);
+        assertEquals(0, game.getPlayer().getInsuranceBet(), 0.01);
+    }
+
+    /**
+     * Tests insurance is not offered without an Ace showing, re-prompts
+     * on a bad answer, and is refused when the bankroll is too low.
+     */
+    public void testInsuranceBadInput() {
+        GameController game = make("1 10 maybe no");
+        game.chooseDecks();
+        game.placeBet();
+        game.getDealer().addCard(new Card("Hearts", "A"));
+        game.getDealer().addCard(new Card("Clubs", "K"));
+        game.offerInsurance();
+        assertEquals(0, game.getPlayer().getInsuranceBet(), 0.01);
+        game.getDealer().addCard(new Card("Spades", "A"));
+        game.offerInsurance();
+        assertEquals(0, game.getPlayer().getInsuranceBet(), 0.01);
+        assertEquals(90, game.getPlayer().getBankroll(), 0.01);
+        assertTrue(systemOut().getHistory().contains("Please type"));
+
+        GameController poor = make("1 100 yes");
+        poor.chooseDecks();
+        poor.placeBet();
+        poor.getDealer().addCard(new Card("Hearts", "A"));
+        poor.offerInsurance();
+        assertEquals(0, poor.getPlayer().getInsuranceBet(), 0.01);
+        assertTrue(systemOut().getHistory().contains("Not enough money"));
+    }
+
+    /**
      * Tests Split deals one card to each new hand and takes a second
      * bet of the same size.
      */

@@ -12,6 +12,7 @@ public class Player {
     private double[] bets;
     private int handCount;
     private int active;
+    private double insuranceBet;
 
     /**
      * Creates a player with a starting bankroll.
@@ -98,6 +99,28 @@ public class Player {
         bets[1] = bets[0];
         handCount = 2;
         hands[1].addCard(hands[0].getCards().removeFirst());
+    }
+
+    /**
+     * Takes a side bet of half the original bet against a dealer
+     * blackjack.
+     *
+     * @throws IllegalStateException if the bankroll cannot cover it
+     */
+    public void placeInsurance() {
+        double half = bets[0] / 2;
+        if (half > bankroll) {
+            throw new IllegalStateException("Not enough money for insurance.");
+        }
+        bankroll -= half;
+        insuranceBet = half;
+    }
+
+    /**
+     * @return the insurance side bet
+     */
+    public double getInsuranceBet() {
+        return insuranceBet;
     }
 
     /**
@@ -223,6 +246,7 @@ public class Player {
         bets[1] = 0;
         handCount = 1;
         active = 0;
+        insuranceBet = 0;
     }
 
     /**

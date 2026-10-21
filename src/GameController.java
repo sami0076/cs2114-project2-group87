@@ -77,6 +77,32 @@ public class GameController {
     }
 
     /**
+     * Offers insurance when the dealer shows an Ace.
+     */
+    public void offerInsurance() {
+        if (!dealer.getHand().getCards().get(0).isAce()) {
+            return;
+        }
+        System.out.println("Dealer shows an Ace. Insurance? (Yes/No)");
+        while (in.hasNext()) {
+            String input = in.next();
+            if ("no".equalsIgnoreCase(input)) {
+                return;
+            }
+            if ("yes".equalsIgnoreCase(input)) {
+                try {
+                    player.placeInsurance();
+                }
+                catch (IllegalStateException e) {
+                    System.out.println(e.getMessage());
+                }
+                return;
+            }
+            System.out.println("Please type 'Yes' or 'No'.");
+        }
+    }
+
+    /**
      * Handles one player command: Hit, Stand, Double, or Split.
      *
      * @param command the command typed by the user
@@ -136,6 +162,11 @@ public class GameController {
     public RoundResult finishRound() {
         if (player.getBet(0) <= 0) {
             throw new IllegalStateException("No bet was placed");
+        }
+        if (player.getInsuranceBet() > 0 && dealer.getHand().isBlackjack()) {
+            player.receivePayout(player.getInsuranceBet() * 3);
+            System.out.println("Insurance pays $"
+                + player.getInsuranceBet() * 2);
         }
         boolean allowBj = player.getHandCount() == 1;
         RoundResult first = null;
@@ -212,6 +243,7 @@ public class GameController {
         dealInitialCards();
         System.out.println("Dealer shows: "
             + dealer.getHand().getCards().get(0));
+        offerInsurance();
         playHand();
         if (player.getHandCount() > 1) {
             player.setActiveHand(1);
