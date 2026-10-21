@@ -1,6 +1,6 @@
 # cs2114-project2-group87
 
-Blackjack
+A console Blackjack game where you bet against a computer dealer, with splitting, insurance, and power-ups, all stored in a generic LinkedChain.
 
 ## Team
 
@@ -9,63 +9,32 @@ Blackjack
 - Angelina Gust
 - Tien Vu
 
-Run GameController.main to play. Tests are the *Test.java files in src.
+## Compile and Run
 
-## Reflection
+All classes are in `src` in the default package. Compile and play the game:
 
-What changed from our spec:
+    javac -d bin -sourcepath src src/GameController.java
+    java -cp bin GameController
 
-- Player: the spec only listed fields. We added placeBet, canDoubleDown, doubleDown, receivePayout, and reset. Player throws IllegalArgumentException on a bad bet as a backup check.
-- GameController: we added chooseDecks, dealInitialCards, dealerPlay, finishRound, playRound, play, and getSummary to split up the game loop.
-- Deck got a discard method so cards from finished hands go to the discard pile.
-- RoundResult uses a String for the outcome instead of an Outcome enum, and we added "Blackjack" as an outcome.
-- Card got isAce(). Hand got size, isBust, isBlackjack, clear, and getCards.
+The tests are the `*Test.java` files in `src`. They use `student.TestCase`
+from the CS2114 student library, so the easiest way to run them is in
+Eclipse with the CS2-Support project on the build path: right-click `src`
+and pick Run As > JUnit Test.
 
-What changed in LinkedChain:
+To compile and run them from the command line instead, put the student
+library and JUnit on the classpath:
 
-- Added removeFirst() so Deck can deal off the top in O(1). It just calls remove().
-- Changed remove(T) to return the removed item (or null) instead of a boolean, to match our spec.
-- Everything else is unchanged. Hand uses toArray to score, GameController uses toArray for the summary and get(0) to show the dealer's card.
+    javac -cp path/to/student.jar -d bin src/*.java
+    java -cp bin:path/to/student.jar:path/to/junit.jar junit.textui.TestRunner PlayerTest
 
-Our unknowns:
+`bin` is build output. Do not commit it.
 
-- Ace recalculation: figured out. Hand.getScore counts every Ace as 11, then takes off 10 per Ace while the total is over 21.
-- Power-ups interrupting the game loop: still open, not sure if we will do this.
+## System Diagram
 
-What doesn't work yet:
+![System diagram](diagram.png)
 
-- Splitting and insurance are not started.
-
-## Next Steps
-
-To finish the MVP:
-
-1. Hide the dealer's second card until the player's turn is over.
-2. Play through a lot of rounds by hand to look for bugs.
-
-Stretch goals:
-
-- Doing: splitting pairs, insurance bets.
-- Dropping/Not sure: Actual GUI, power-ups.
-
-New tests needed:
-
-- Splitting: split a pair, try to split a non-pair, try to split without enough money.
-- Insurance: take insurance when the dealer shows an Ace, try it when they don't, try it without enough money, check the 2 to 1 payout.
-
-Who does what:
-
-
-| Task             | Owner |
-| ---------------- | ----- |
-| Deck tests       | Tien  |
-| Hide dealer card |Pratham|
-| Splitting        | Angela|
-| Insurance        | Sami  |
-| New tests        | Sami  |
-
-
-
+LinkedChain<T> holds Card in the draw pile, discard pile, and hands,
+RoundResult in the history log, and String in the power-up inventory.
 
 ## Attribution
 
