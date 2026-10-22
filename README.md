@@ -1,6 +1,6 @@
 # cs2114-project2-group87
 
-A console Blackjack game where you bet against a computer dealer, with splitting, insurance, and power-ups, all stored in a generic LinkedChain.
+A Blackjack game where you bet against a computer dealer, with splitting, insurance, and power-ups, all stored in a generic LinkedChain.
 
 ## Team
 
