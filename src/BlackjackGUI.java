@@ -9,15 +9,19 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class BlackjackGUI extends JFrame {
+    private static final int DEFAULT_DECKS = 4;
     private static final double PEEK_COST = 25;
     private static final double DOUBLE_COST = 40;
 
@@ -46,15 +50,17 @@ public class BlackjackGUI extends JFrame {
     private JButton doubleButton;
     private JButton splitButton;
     private JButton newGameButton;
+    private JButton historyButton;
     private JButton peekButton;
     private JButton freeDoubleButton;
     private JButton buyPeekButton;
     private JButton buyDoubleButton;
     private JLabel inventoryLabel;
+    private JComboBox<Integer> deckChoice;
 
     public BlackjackGUI() {
         deck = new Deck();
-        deck.build(4);
+        deck.build(DEFAULT_DECKS);
         player = new Player(100);
         dealer = new Dealer();
         history = new LinkedChain<RoundResult>();
@@ -80,6 +86,14 @@ public class BlackjackGUI extends JFrame {
         currentBetLabel.setForeground(Color.WHITE);
         currentBetLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
 
+        JLabel deckPrompt = new JLabel("Decks:");
+        deckPrompt.setForeground(Color.WHITE);
+        deckPrompt.setFont(new Font("SansSerif", Font.BOLD, 16));
+
+        deckChoice = new JComboBox<Integer>(
+            new Integer[] {1, 2, 3, 4, 5, 6});
+        deckChoice.setSelectedItem(DEFAULT_DECKS);
+
         inventoryLabel = new JLabel("Peek: 0   Free Double: 0");
         inventoryLabel.setForeground(Color.WHITE);
         inventoryLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -87,10 +101,16 @@ public class BlackjackGUI extends JFrame {
         newGameButton = new JButton("New Game");
         newGameButton.addActionListener(e -> resetGame());
 
+        historyButton = new JButton("History");
+        historyButton.addActionListener(e -> showHistory("Round History"));
+
         topPanel.add(bankrollLabel);
         topPanel.add(currentBetLabel);
         topPanel.add(inventoryLabel);
+        topPanel.add(deckPrompt);
+        topPanel.add(deckChoice);
         topPanel.add(newGameButton);
+        topPanel.add(historyButton);
         add(topPanel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel();
@@ -223,13 +243,65 @@ public class BlackjackGUI extends JFrame {
         buyPeekButton.addActionListener(e -> buy("Peek", PEEK_COST));
         buyDoubleButton.addActionListener(
             e -> buy("Free Double", DOUBLE_COST));
+        deckChoice.addActionListener(e -> rebuildShoe());
 
         updateUI();
     }
 
+    private void showHistory(String title) {
+        JTextArea area = new JTextArea(getSummary(), 14, 42);
+        area.setEditable(false);
+        JScrollPane scroll = new JScrollPane(area);
+        JOptionPane.showMessageDialog(this, scroll, title,
+            JOptionPane.PLAIN_MESSAGE);
+    }
+
+    /**
+     * @return every round played, then the win/loss/tie totals
+     */
+    private String getSummary() {
+        RoundResult[] results =
+            history.toArray(new RoundResult[history.size()]);
+        int wins = 0;
+        int losses = 0;
+        int ties = 0;
+        StringBuilder rounds = new StringBuilder();
+        for (int i = results.length - 1; i >= 0; i--) {
+            RoundResult r = results[i];
+            if (r.getOutcome().equals("Loss")) {
+                losses++;
+            }
+            else if (r.getOutcome().equals("Tie")) {
+                ties++;
+            }
+            else {
+                wins++;
+            }
+            rounds.append("Round ").append(results.length - i).append(": ")
+                .append(r).append("\n");
+        }
+        if (results.length == 0) {
+            rounds.append("No rounds played yet.\n");
+        }
+        return rounds + "\nRounds played: " + history.size() + ", Wins: "
+            + wins + ", Losses: " + losses + ", Ties: " + ties
+            + "\nFinal money: $" + player.getBankroll();
+    }
+
+    private void rebuildShoe() {
+        if (inRound) {
+            return;
+        }
+        int decks = (Integer)deckChoice.getSelectedItem();
+        deck = new Deck();
+        deck.build(decks);
+        statusLabel.setText("Shoe rebuilt with " + decks
+            + (decks == 1 ? " deck." : " decks."));
+    }
+
     private void resetGame() {
         deck = new Deck();
-        deck.build(4);
+        deck.build((Integer)deckChoice.getSelectedItem());
         player = new Player(100);
         dealer = new Dealer();
         history = new LinkedChain<RoundResult>();
@@ -541,6 +613,9 @@ public class BlackjackGUI extends JFrame {
             dealButton.setEnabled(false);
             betField.setEnabled(false);
             statusLabel.setText(statusLabel.getText() + " You are broke! Game over.");
+            updateUI();
+            showHistory("Game Over");
+            return;
         }
         else {
             dealButton.setEnabled(true);
@@ -565,6 +640,7 @@ public class BlackjackGUI extends JFrame {
         peekButton.setEnabled(inRound && inv.contains("Peek"));
         freeDoubleButton.setEnabled(inRound
             && inv.contains("Free Double") && player.getHand().size() == 2);
+        deckChoice.setEnabled(!inRound);
         buyPeekButton.setEnabled(!inRound);
         buyDoubleButton.setEnabled(!inRound);
 
