@@ -18,6 +18,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class BlackjackGUI extends JFrame {
+    private static final double PEEK_COST = 25;
+    private static final double DOUBLE_COST = 40;
+
     private Deck deck;
     private Player player;
     private Dealer dealer;
@@ -43,6 +46,11 @@ public class BlackjackGUI extends JFrame {
     private JButton doubleButton;
     private JButton splitButton;
     private JButton newGameButton;
+    private JButton peekButton;
+    private JButton freeDoubleButton;
+    private JButton buyPeekButton;
+    private JButton buyDoubleButton;
+    private JLabel inventoryLabel;
 
     public BlackjackGUI() {
         deck = new Deck();
@@ -72,11 +80,16 @@ public class BlackjackGUI extends JFrame {
         currentBetLabel.setForeground(Color.WHITE);
         currentBetLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
 
+        inventoryLabel = new JLabel("Peek: 0   Free Double: 0");
+        inventoryLabel.setForeground(Color.WHITE);
+        inventoryLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+
         newGameButton = new JButton("New Game");
         newGameButton.addActionListener(e -> resetGame());
 
         topPanel.add(bankrollLabel);
         topPanel.add(currentBetLabel);
+        topPanel.add(inventoryLabel);
         topPanel.add(newGameButton);
         add(topPanel, BorderLayout.NORTH);
 
@@ -169,6 +182,11 @@ public class BlackjackGUI extends JFrame {
         betRow.add(betField);
         betRow.add(dealButton);
 
+        buyPeekButton = new JButton("Buy Peek ($" + PEEK_COST + ")");
+        buyDoubleButton = new JButton("Buy Free Double ($" + DOUBLE_COST + ")");
+        betRow.add(buyPeekButton);
+        betRow.add(buyDoubleButton);
+
         JPanel actionRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 8));
         actionRow.setOpaque(false);
 
@@ -176,6 +194,8 @@ public class BlackjackGUI extends JFrame {
         standButton = new JButton("Stand");
         doubleButton = new JButton("Double Down");
         splitButton = new JButton("Split");
+        peekButton = new JButton("Peek");
+        freeDoubleButton = new JButton("Free Double");
 
         hitButton.setEnabled(false);
         standButton.setEnabled(false);
@@ -186,6 +206,8 @@ public class BlackjackGUI extends JFrame {
         actionRow.add(standButton);
         actionRow.add(doubleButton);
         actionRow.add(splitButton);
+        actionRow.add(peekButton);
+        actionRow.add(freeDoubleButton);
 
         bottomPanel.add(betRow);
         bottomPanel.add(actionRow);
@@ -196,6 +218,11 @@ public class BlackjackGUI extends JFrame {
         standButton.addActionListener(e -> stand());
         doubleButton.addActionListener(e -> doubleDown());
         splitButton.addActionListener(e -> split());
+        peekButton.addActionListener(e -> peek());
+        freeDoubleButton.addActionListener(e -> freeDouble());
+        buyPeekButton.addActionListener(e -> buy("Peek", PEEK_COST));
+        buyDoubleButton.addActionListener(
+            e -> buy("Free Double", DOUBLE_COST));
 
         updateUI();
     }
@@ -365,6 +392,41 @@ public class BlackjackGUI extends JFrame {
             return;
         }
         player.doubleDown();
+        finishDouble();
+    }
+
+    private void freeDouble() {
+        if (!inRound || player.getHand().size() != 2
+            || !player.usePowerUp("Free Double")) {
+            return;
+        }
+        player.freeDouble();
+        finishDouble();
+    }
+
+    private void peek() {
+        if (!inRound || !player.usePowerUp("Peek")) {
+            return;
+        }
+        JOptionPane.showMessageDialog(this, "Hole card: "
+            + dealer.getHand().getCards().get(1));
+        updateUI();
+    }
+
+    private void buy(String name, double cost) {
+        if (inRound) {
+            return;
+        }
+        if (player.buyPowerUp(name, cost)) {
+            statusLabel.setText("Bought " + name + ".");
+        }
+        else {
+            statusLabel.setText("Not enough money for " + name + ".");
+        }
+        updateUI();
+    }
+
+    private void finishDouble() {
         player.addCard(deck.dealCard());
         doubleButton.setEnabled(false);
         splitButton.setEnabled(false);
@@ -457,6 +519,9 @@ public class BlackjackGUI extends JFrame {
                 payout = bet;
             }
 
+            if (outcome.equals("Blackjack")) {
+                player.addPowerUp("Peek");
+            }
             player.receivePayout(payout);
             history.add(new RoundResult(outcome, bet, payout));
 
@@ -493,6 +558,15 @@ public class BlackjackGUI extends JFrame {
         else {
             currentBetLabel.setText("Current Bet: $0.00");
         }
+
+        LinkedChain<String> inv = player.getInventory();
+        inventoryLabel.setText("Peek: " + inv.count("Peek")
+            + "   Free Double: " + inv.count("Free Double"));
+        peekButton.setEnabled(inRound && inv.contains("Peek"));
+        freeDoubleButton.setEnabled(inRound
+            && inv.contains("Free Double") && player.getHand().size() == 2);
+        buyPeekButton.setEnabled(!inRound);
+        buyDoubleButton.setEnabled(!inRound);
 
         dealerCardsPanel.removeAll();
         LinkedChain<Card> dCards = dealer.getHand().getCards();
