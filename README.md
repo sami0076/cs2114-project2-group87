@@ -18,6 +18,11 @@ javac -d bin -sourcepath src src/GameController.java
 java -cp bin GameController
 ```
 
+Or run the GUI:
+
+    javac -d bin -sourcepath src src/BlackjackGUI.java
+    java -cp bin BlackjackGUI
+
 The tests are the `*Test.java` files in `src`. They use `student.TestCase`
 from the CS2114 student library, so the easiest way to run them is in
 Eclipse with the CS2-Support project on the build path: right-click `src`
@@ -60,6 +65,8 @@ LinkedChain holds Card in the draw pile, discard pile, and hands, RoundResult in
 | RoundResultTest.java    | Tien Vu       | wrote, GenAI-assisted                                                            |
 | Deck.java               | Tien Vu       | wrote                                                                            |
 | DeckTest.java           | Tien Vu       | wrote                                                                            |
+| BlackjackGUI.java       | Pratham Singh | wrote                                                                            |
+| BlackjackGUITest.java   | Pratham Singh | wrote                                                                            |
 
 
 GenAI: Sami, Tien, Pratham, and Angelina used Claude to help plan out writing classes and their tests, making sure to verify with spec before planning. We reviewed the code and ran the tests ourselves. Pratham used gemini to verify the code based on the spec, to create java docs, and planning out writing the test cases.
